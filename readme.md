@@ -2,7 +2,7 @@
 
 An RPG game written in python with a command line interface. Mainly 
 inspired by Final Fantasy VII and X, as well as Knights of the Old 
-Republic. Currently, it is more of demo that lacks an actual story or title. 
+Republic. Currently, it is more of a demo that lacks an actual story or title. 
 
 ## Build Instructions
 
