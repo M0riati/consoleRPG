@@ -3,7 +3,7 @@ from asciimatics.screen import Screen
 
 class Sprite:
     def __init__(self, sprite_, x, y, onhover=lambda: None, canvas_=None, color=Screen.COLOUR_WHITE,
-                 spriteGeneratorFunction=None, positionFunction=lambda: exec('pass'), hidden=False):
+                 spriteGeneratorFunction=None, positionFunction=lambda: None, hidden=False):
         self.canvas = canvas_
         self.positionFunction = positionFunction
         self.spriteGeneratorFunction = spriteGeneratorFunction if spriteGeneratorFunction is not None else self.dummySpriteGenerator
@@ -53,8 +53,7 @@ class Sprite:
             self.onhover()
             self.canvas.isHovering = True
         if self.positionFunction() is not None:
-            self.x = self.positionFunction()[0]
-            self.y = self.positionFunction()[1]
+            self.x, self.y = self.positionFunction()
 
 
 class ColorMappedSprite(Sprite):

@@ -2,14 +2,15 @@ from interface.sprite import Sprite
 
 
 class ListWidget(Sprite):
-    def __init__(self, list_, x, y, height=5, listProperty=None, onElementSelected=lambda i: None,
+    def __init__(self, list_, x, y, height=5, listProperty=None, onElementSelected=lambda i: None, positionFunction=lambda: None,
                  onElementRightClicked=lambda i: None,
-                 onElementHovered=lambda i: None, width=25, coloring=lambda e: 7, followTail=False):
+                 onElementHovered=lambda i: None, width=25, coloring=lambda e: 7, reprFunction=lambda e: str(e), followTail=False):
         if listProperty is None:
             listProperty = ''
         self.onElementHovered = onElementHovered
         self.onElementSelected = onElementSelected
         self.onElementRightClicked = onElementRightClicked
+        self.reprFunction = reprFunction
         self._list = list_
         self.height = height
         self.width = width
@@ -17,11 +18,12 @@ class ListWidget(Sprite):
         self.i = 0
         self.coloring = coloring
         self.listProperty = listProperty
-        super().__init__('', x, y)
+        super().__init__('', x, y, positionFunction=positionFunction)
 
     def update(self):
+        super().update()
         if self.isClicked() or self.isRightClicked():
-            if len(self.list) > self.height and self.canvas.mouseX == self.x + 25 and self.canvas.mouseY in (
+            if len(self.list) > self.height and self.canvas.mouseX == self.x + self.width and self.canvas.mouseY in (
                     self.y, self.y + len(
                         self.sprite) - 1) and not self.isRightClicked():
                 if self.canvas.mouseY == self.y:
@@ -51,7 +53,7 @@ class ListWidget(Sprite):
 
     @property
     def sprite(self):
-        sprite = [str(e) for e in self.list[self.i:self.i + self.height]]
+        sprite = [self.reprFunction(e) for e in self.list[self.i:self.i + self.height]]
         sprite += (self.height - len(sprite)) * ['']
         if len(self.list) > self.height:
             sprite[0] += (self.width - len(sprite[0])) * ' ' + '↑'

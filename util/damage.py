@@ -55,12 +55,13 @@ class Damage:
             self.amount = round(self.amount * other)
         return self
 
-    def deal(self, target):
+    def deal(self, target, log=True):
         target.harm(self.amount, self.type)
-        if self.amount > 0:
-            target.fight.combatLog.append(f'Dealing {self.amount} {self.type.name.lower()} damage to {target}')
-        elif self.type != DamageTypes.UNSTOPPABLE:
-            target.fight.combatLog.append(f'No damage dealt.')
+        if log:
+            if self.amount > 0:
+                target.fight.combatLog.append(f'Dealing {self.amount} {self.type.name.lower()} damage to {target}')
+            elif self.type != DamageTypes.UNSTOPPABLE:
+                target.fight.combatLog.append(f'No damage dealt.')
 
     def convert(self, dmgType):
         self.type = dmgType

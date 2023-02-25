@@ -3,6 +3,7 @@ from time import *
 import pyogg
 import simpleaudio as sa
 from asciimatics.event import *
+from asciimatics.screen import Screen
 
 from interface import *
 from util import context

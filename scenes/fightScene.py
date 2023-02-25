@@ -1,6 +1,6 @@
 import enum
 
-from ability import MultiCastable
+from ability import MultiCastable, SelfCastable
 from interface import *
 from status import Silenced, HPConversion
 from util.usedOn import UsedOn
@@ -120,6 +120,8 @@ class FightScene(Scene):
                 self.setTargetSelectionMode(TargetSelectionMode.MULTI,
                                             lambda targets: self.onCastMultiSpell(self.multiCursorSelectingEnemies,
                                                                                   spell), autoTarget=spell.usedOn)
+            elif isinstance(spell, SelfCastable):
+                self.onCastSpell(self.fight.participants.index(self.fight.currentTurn), spell)
             else:
                 self.setTargetSelectionMode(TargetSelectionMode.SINGLE, lambda target: self.onCastSpell(target, spell),
                                             autoTarget=spell.usedOn)
@@ -141,6 +143,9 @@ class FightScene(Scene):
         return (['>'] + [''] * 5) * (
             len(self.fight.enemies) if self.multiCursorSelectingEnemies else len(self.fight.party))
 
+    def getCommandPanelPosition(self, i):
+        return 4, len(self.partyInfoPanel.sprite) + 2 + i
+
     def __init__(self, fight):
         super().__init__()
         self.fight = fight
@@ -148,21 +153,19 @@ class FightScene(Scene):
         self.onTargetSelected = None
         self.currentSelectionUsedOn = None
         self._targetSelectionMode = None
-        self.attackButton = Button(['[Attack]'], 50, 0,
-                                   onclick=lambda: self.setTargetSelectionMode(TargetSelectionMode.SINGLE,
-                                                                               lambda target: self.onAttack(target)))
-        self.itemsButton = Button(['[Items]'], 50, 1, onclick=lambda: self.setCommandPanelState(CommandPanelState.ITEM))
-        self.abilitiesButton = Button(['[Abilities]'], 50, 2,
+        self.attackButton = Button(['[Attack]'], 50, 0, positionFunction=lambda: self.getCommandPanelPosition(0), onclick=lambda: self.setTargetSelectionMode(TargetSelectionMode.SINGLE, lambda target: self.onAttack(target)))
+        self.itemsButton = Button(['[Items]'], 50, 1, positionFunction=lambda: self.getCommandPanelPosition(1), onclick=lambda: self.setCommandPanelState(CommandPanelState.ITEM))
+        self.abilitiesButton = Button(['[Abilities]'], 50, 2, positionFunction=lambda: self.getCommandPanelPosition(2),
                                       onclick=lambda: self.setCommandPanelState(CommandPanelState.ABILITY))
-        self.skipTurnButton = Button(['[Skip Turn]'], 50, 3, onclick=lambda: self.onSkip())
-        self.cancelButton = Button(['[Cancel]'], 50, 6,
+        self.skipTurnButton = Button(['[Skip Turn]'], 50, 3, positionFunction=lambda: self.getCommandPanelPosition(3), onclick=lambda: self.onSkip())
+        self.cancelButton = Button(['[Cancel]'], 50, 6, positionFunction=lambda: self.getCommandPanelPosition(10),
                                    onclick=lambda: self.setCommandPanelState(CommandPanelState.MAIN))
         self._commandPanelState = CommandPanelState.HIDDEN
-        self.itemsWidget = ListWidget([], 50, 0, 5, listProperty='self.fight.currentTurn.inventory.consumables',
-                                      onElementSelected=lambda i: self.onItemSelect(i))
-        self.abilitiesWidget = ListWidget([], 50, 0, 5, listProperty='self.fight.currentTurn.castableSpells',
+        self.itemsWidget = ListWidget([], 50, 0, 10, positionFunction=lambda: self.getCommandPanelPosition(0), listProperty='self.fight.currentTurn.inventory.consumables',
+                                      onElementSelected=lambda i: self.onItemSelect(i), width=40)
+        self.abilitiesWidget = ListWidget([], 50, 0, 10, positionFunction=lambda: self.getCommandPanelPosition(0), listProperty='self.fight.currentTurn.castableSpells',
                                           onElementSelected=lambda i: self.selectSpellTarget(i),
-                                          coloring=lambda e: 0 if e.mpCost >= self.fight.currentTurn.mp else 7)
+                                          coloring=lambda e: 7 if self.fight.currentTurn.canUseSpell(e) else 1, reprFunction=lambda e: e.reprWithCost(self.fight.currentTurn.hasStatusOfType(HPConversion)), width=40)
         self.singleCursor = Sprite(['>'], 48, 0, positionFunction=self.singleCursorCoords)
         self.multiCursor = Sprite([], 48, 0, positionFunction=self.multiCursorCoords,
                                   spriteGeneratorFunction=self.multiCursorSpriteGenerator)
@@ -170,10 +173,13 @@ class FightScene(Scene):
         self.multiCursorSelectingEnemies = True
         self.singleCursor.hidden = True
         self.hideAllCommandPanelButtons()
+        self.partyInfoPanel = Sprite([''], 4, 0, color=Screen.COLOUR_BLUE, spriteGeneratorFunction=lambda: self.partyInfo)
+        self.enemyInfoPanel = Sprite([''], 80, 0, color=Screen.COLOUR_RED, spriteGeneratorFunction=lambda: self.enemyInfo)
+        self.combatLog = ListWidget([''], 0, 25, 10, positionFunction=lambda: self.getCommandPanelPosition(13), width=10000, listProperty='self.fight.combatLog', followTail=True)
         self.sprites = [
-            Sprite([''], 4, 0, color=Screen.COLOUR_BLUE, spriteGeneratorFunction=lambda: self.partyInfo),
-            Sprite([''], 80, 0, color=Screen.COLOUR_RED, spriteGeneratorFunction=lambda: self.enemyInfo),
-            ListWidget([''], 0, 25, 4, width=10000, listProperty='self.fight.combatLog', followTail=True),
+            self.combatLog,
+            self.partyInfoPanel,
+            self.enemyInfoPanel,
             self.attackButton,
             self.itemsButton,
             self.abilitiesButton,

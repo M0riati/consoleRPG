@@ -19,3 +19,10 @@ class NonPlayerCharacter(Character):
     def turn(self, fight):
         self.attack(self.getRandomTarget())
         return False
+
+class Dummy(Character):
+    def __init__(self):
+        super().__init__(lvl=100, name='Test Dummy')
+
+    def turn(self, fight):
+        return False
