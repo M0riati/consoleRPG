@@ -2,7 +2,7 @@ import enum
 
 from ability import MultiCastable
 from interface import *
-from status import Silenced
+from status import Silenced, HPConversion
 from util.usedOn import UsedOn
 
 
@@ -99,14 +99,14 @@ class FightScene(Scene):
         self.fight.awaitingPlayerInput = False
 
     def onCastSpell(self, target, spell):
-        if self.fight.currentTurn.mp >= spell.mpCost:
+        if self.fight.currentTurn.canUseSpell(spell):
             self.fight.currentTurn.modifyMP(-spell.mpCost)
             spell.cast(self.fight.currentTurn, self.fight.participants[target])
             self.fight.awaitingPlayerInput = False
             self.singleCursor.hidden = True
 
     def onCastMultiSpell(self, enemies, spell):
-        if self.fight.currentTurn.mp >= spell.mpCost:
+        if self.fight.currentTurn.canUseSpell(spell):
             self.fight.currentTurn.modifyMP(-spell.mpCost)
             spell.cast(self.fight.currentTurn, self.fight.enemies if enemies else self.fight.party)
             self.fight.awaitingPlayerInput = False
@@ -114,7 +114,7 @@ class FightScene(Scene):
 
     def selectSpellTarget(self, i):
         spell = self.fight.currentTurn.castableSpells[i]
-        if self.fight.currentTurn.mp >= spell.mpCost and not (
+        if self.fight.currentTurn.canUseSpell(spell) and not (
                 not spell.castableIfSilenced and self.fight.currentTurn.hasStatusOfType(Silenced)):
             if isinstance(spell, MultiCastable):
                 self.setTargetSelectionMode(TargetSelectionMode.MULTI,

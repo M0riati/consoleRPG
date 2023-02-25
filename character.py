@@ -20,7 +20,7 @@ class Character:
         self.maxMP = 9999
         self.hp = self.maxHP
         self.mp = self.maxMP
-        self.abilities = [SkilltreeRoot]
+        self.abilities = [skilltreeRoot]
         self.justLearnt = []
         self.statusEffects = []
         self.equippedWeapons = []
@@ -254,6 +254,12 @@ class Character:
             amount *= 0.5
         elif self.hasStatusOfType(MagicalShield) and dmgType in halvedByMagicShield:
             amount *= 0.5
+        if self.hasStatusOfType(BloodMarkHP) or self.hasStatusOfType(BloodMarkMP):
+            for statusEffect in self.statusEffects:
+                if isinstance(statusEffect, BloodMarkHP):
+                    statusEffect.caster.heal(0.3*amount)
+                elif isinstance(statusEffect, BloodMarkMP):
+                    statusEffect.caster.modifyMP(0.6*amount)
         self.hp -= amount
         if self.hp < 0:
             self.hp = 0
@@ -264,11 +270,11 @@ class Character:
                 return True
         return False
 
-    def applyStatus(self, statusType, chance=1, dc=30, duration=None):
+    def applyStatus(self, statusType, chance=1.0, dc=30, duration=None, caster=None):
         if random.random() <= chance:
             if not self.hasStatusOfType(statusType):
                 if not doAttributeCheck(self.constitution, dc):
-                    status = statusType(self, duration)
+                    status = statusType(self, duration=duration, caster=caster)
                     self.statusEffects.append(status)
                     status.onApply()
 
@@ -310,6 +316,9 @@ class Character:
                         if convertToDamageType is not None:
                             damage.convert(convertToDamageType)
                         damage.deal(target)
+        if target.hasStatusOfType(ShockBarrier):
+            Damage(Dice('2d6').roll(), DamageTypes.LIGHTNING).deal(self)
+            self.applyStatus(Stunned, 0.3, 20, 3)
         return hitAtLeastOnce
 
     def getHealthBar(self, width=10):
@@ -366,6 +375,11 @@ class Character:
         self.maxMP = 5 * self.level * (5 + getAttributeMod(self.wisdom))
         self.mp = mpPercentage * self.maxMP
 
+    def learnAllDependents(self, skilltreeNode):
+        for dependent in skilltreeNode.dependents:
+            self.abilities.append(dependent)
+            self.learnAllDependents(dependent)
+
     @property
     def hpPercentage(self):
         return limit(self.hp / self.maxHP)
@@ -380,6 +394,17 @@ class Character:
             self.mp = self.maxMP
         elif self.mp < 0:
             self.mp = 0
+        if self.hasStatusOfType(HPConversion) and amount < 0:
+            self.mp -= amount/2
+            self.harm(-amount/4)
+
+    def canUseSpell(self, spell):
+        if spell in self.abilities:
+            if not self.hasStatusOfType(HPConversion):
+                return self.mp >= spell.mpCost and self.hp >= spell.hpCost
+            else:
+                return self.mp >= spell.mpCost/2 and self.hp >= spell.hpCost + spell.mpCost/4
+        return False
 
     def turn(self, battle):
         return True
