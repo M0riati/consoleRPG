@@ -8,7 +8,7 @@ youdiedText = FigletText("Y O U   D I E D", font='POISON')
 class YouDied(Scene):
     def __init__(self):
         super(YouDied, self).__init__()
-        self.musicPath = 'assets/audio/music/clairDeLune.ogg'
+        self.tracklist = ['assets/audio/music/clairDeLune.ogg']
         self.sprites = [
             ColorMappedSprite(
                 youdiedText.rendered_text[0],

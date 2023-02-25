@@ -1,3 +1,4 @@
+import random
 from time import *
 
 import pyogg
@@ -46,7 +47,7 @@ class Canvas:
         self.running = False
         if self.canvasWrapper is not None:
             self.canvasWrapper.running = False
-        if self.scene.musicPath is not None:
+        if self.scene.tracklist:
             self.musicPlayObject.stop()
 
     def drawSprites(self):
@@ -91,10 +92,10 @@ class Canvas:
 
     def start(self, screen: Screen):
         self.screen = screen
-        if self.scene.musicPath is not None and self.musicPlayObject is None:
-            vorbisFile = pyogg.VorbisFile(self.scene.musicPath)
-            self.musicPlayObject = sa.play_buffer(vorbisFile.buffer, vorbisFile.channels, 2, vorbisFile.frequency)
         while self.running:
+            if self.scene.tracklist and (self.musicPlayObject is None or (not self.musicPlayObject.is_playing() and self.scene.loopEnabled)):
+                vorbisFile = pyogg.VorbisFile(random.choice(self.scene.tracklist))
+                self.musicPlayObject = sa.play_buffer(vorbisFile.buffer, vorbisFile.channels, 2, vorbisFile.frequency)
             self.t = time()
             self.delta = self.t - self.lastT
             self.scene.update()

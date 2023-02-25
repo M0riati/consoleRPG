@@ -98,7 +98,7 @@ class CharacterEditor(Scene):
         self.availableWeapons = [Warhammer(), Mace(), MorningStar(), Spear(), Shortsword(), Wakizashi(), Katana(),
                                  ArmingSword(), BastardSword(), Longsword(), Greatsword()]
         self.onnothover = self.setAttributeDesc
-        self.musicPath = 'assets/audio/music/neptune.ogg'
+        self.tracklist = ['assets/audio/music/neptune.ogg']
         self.weaponDesc = Textbox('{self.describedWeapon.desc if self.describedWeapon is not None else ""}',
                                   column4 + 20, 17, 60, scrolling=False)
         self.describedWeapon = None

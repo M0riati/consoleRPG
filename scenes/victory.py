@@ -8,7 +8,8 @@ victoryText = FigletText("V I C T O R Y", font='ROMAN')
 class Victory(Scene):
     def __init__(self):
         super().__init__()
-        self.musicPath = 'assets/audio/music/clairDeLune.ogg'
+        self.tracklist = ['assets/audio/music/fanfare.ogg']
+        self.loopEnabled = False
         self.sprites = [
             Sprite(
                 victoryText.rendered_text[0],

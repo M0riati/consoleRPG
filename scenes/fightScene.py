@@ -190,7 +190,7 @@ class FightScene(Scene):
             self.singleCursor,
             self.multiCursor
         ]
-        self.musicPath = 'assets/audio/music/newWorld.ogg'
+        self.tracklist = ['assets/audio/music/newWorld.ogg', 'assets/audio/music/summer.ogg', 'assets/audio/music/DotK.ogg']
 
     @property
     def enemyInfo(self):
