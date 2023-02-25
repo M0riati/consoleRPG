@@ -115,7 +115,7 @@ class Weapon(Equipable):
         for ability_ in self.character.abilities:
             if isinstance(ability_, ability.Skill):
                 for p in ability_.properties:
-                    if isinstance(p, WeaponProficiencyProperty):
+                    if isinstance(p, ability.WeaponProficiencyProperty):
                         if isinstance(self, p.weaponType):
                             mod += p.bonus
         if self.character.duelWielding:
@@ -168,7 +168,8 @@ class Weapon(Equipable):
 class Warhammer(Weapon):
     baseProperties = [
         DamageProperty('3d10', DamageTypes.BLUDGEONING),
-        HandednessProperty(True)
+        HandednessProperty(True),
+        CriticalThreatProperty(0, 2),
     ]
 
     def __init__(self, properties=[]):
@@ -180,7 +181,8 @@ class Warhammer(Weapon):
 class Mace(Weapon):
     baseProperties = [
         DamageProperty('2d8', DamageTypes.BLUDGEONING),
-        HandednessProperty(False, -4)
+        HandednessProperty(False, -4),
+        CriticalThreatProperty(0, 2),
     ]
 
     def __init__(self, properties=[]):
@@ -193,7 +195,8 @@ class MorningStar(Weapon):
     baseProperties = [
         DamageProperty('2d4', DamageTypes.BLUDGEONING),
         DamageProperty('1d5', DamageTypes.PIERCING),
-        HandednessProperty(False, -4)
+        HandednessProperty(False, -4),
+        CriticalThreatProperty(0, 2),
     ]
 
     def __init__(self, properties=[]):
@@ -202,14 +205,11 @@ class MorningStar(Weapon):
         self.desc = 'Similar to a mace, but with spikes on top, making it even more deadly.'
 
 
-class Quarterstaff:
-    pass
-
-
 class Spear(Weapon):
     baseProperties = [
         DamageProperty('6d4', DamageTypes.PIERCING),
-        HandednessProperty(True)
+        HandednessProperty(True),
+        CriticalThreatProperty(0, 2),
     ]
 
     def __init__(self, properties=[]):
@@ -219,10 +219,6 @@ class Spear(Weapon):
 
 
 class Sword(Weapon):
-    pass
-
-
-class TwoHandedSword(Weapon):
     pass
 
 
