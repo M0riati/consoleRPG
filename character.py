@@ -204,6 +204,9 @@ class Character:
 
     @offHand.setter
     def offHand(self, newWeapon):
+        if newWeapon.twoHanded:
+            self.mainHand = newWeapon
+            return
         if self._offHand is None:
             if self._mainHand is None:
                 self._mainHand = newWeapon
@@ -296,9 +299,15 @@ class Character:
             if self.hp > self.maxHP:
                 self.hp = self.maxHP
 
+    @property
+    def uniqueWeapons(self):
+        if self.mainHand is None:
+            return None, None
+        return (self.mainHand, self.offHand) if not self.mainHand.twoHanded else (self.mainHand,)
+
     def attack(self, target, multiplier=1.0, convertToDamageType=None, critGuaranteed=False):
         hitAtLeastOnce = False
-        for weapon_ in (self.mainHand, self.offHand):
+        for weapon_ in self.uniqueWeapons:
             if weapon_ is None:
                 continue
             for i in range(0, weapon_.attacks):
