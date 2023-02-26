@@ -114,6 +114,7 @@ class FightScene(Scene):
 
     def selectSpellTarget(self, i):
         spell = self.fight.currentTurn.castableSpells[i]
+        self.currentSpell = spell
         if self.fight.currentTurn.canUseSpell(spell) and not (
                 not spell.castableIfSilenced and self.fight.currentTurn.hasStatusOfType(Silenced)):
             if isinstance(spell, MultiCastable):
@@ -153,6 +154,7 @@ class FightScene(Scene):
         self.onTargetSelected = None
         self.currentSelectionUsedOn = None
         self._targetSelectionMode = None
+        self.currentSpell = None
         self.attackButton = Button(['[Attack]'], 50, 0, positionFunction=lambda: self.getCommandPanelPosition(0), onclick=lambda: self.setTargetSelectionMode(TargetSelectionMode.SINGLE, lambda target: self.onAttack(target)))
         self.itemsButton = Button(['[Items]'], 50, 1, positionFunction=lambda: self.getCommandPanelPosition(1), onclick=lambda: self.setCommandPanelState(CommandPanelState.ITEM))
         self.abilitiesButton = Button(['[Abilities]'], 50, 2, positionFunction=lambda: self.getCommandPanelPosition(2),
@@ -218,8 +220,7 @@ class FightScene(Scene):
         if isinstance(event, KeyboardEvent) and self._targetSelectionMode != TargetSelectionMode.OFF:
             if event.key_code in (11, 13):
                 if self.targetSelectionMode is TargetSelectionMode.SINGLE:
-                    if not self.fight.participants[self.target].dead or (
-                            self.fight.participants[self.target].dead and self.currentSelectionUsedOn == UsedOn.DEAD):
+                    if (not (self.fight.participants[self.target] == self.fight.currentTurn and not self.currentSpell.castableOnSelf) and not self.fight.participants[self.target].dead) or (self.fight.participants[self.target].dead and self.currentSelectionUsedOn == UsedOn.DEAD):
                         self.setTargetSelectionMode(TargetSelectionMode.OFF)
                 else:
                     self.setTargetSelectionMode(TargetSelectionMode.OFF)

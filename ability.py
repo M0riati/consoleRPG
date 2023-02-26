@@ -47,13 +47,14 @@ class WeaponProficiencyProperty(SkillProperty):
 
 class Castable(Ability):
     def __init__(self, name, desc, dependents, oncast, mpCost, hpCost=0, usedOn=UsedOn.HOSTILE, repellable=False,
-                 castableIfSilenced=True):
+                 castableIfSilenced=True, castableOnSelf=True):
         super().__init__(name, desc, dependents)
         self.dependents = dependents
         self.mpCost = mpCost
         self.oncast = oncast
         self.hpCost = hpCost
         self.usedOn = usedOn
+        self.castableOnSelf = castableOnSelf
         self.repellable = repellable
         self.castableIfSilenced = castableIfSilenced
 
@@ -618,6 +619,7 @@ magic = Ability(
                             name='Drain HP',
                             desc="The use of blood magic allows you to fuel some of the life essence of others back into you. The damage of this spell is determined by rolling a number of d4 (1-4 damage each) equivalent to your wisdom mod+level, which is then added to your HP.",
                             oncast=drainHPFunction,
+                            castableOnSelf=False,
                             repellable=True,
                             castableIfSilenced=False,
                             mpCost=60,
@@ -626,6 +628,7 @@ magic = Ability(
                                     name='Tap Life',
                                     desc="Even more insidious, this ability allows you to passively funnel some your the target\'s hp in to your own every tick.",
                                     oncast=tapLifeFunction,
+                                    castableOnSelf=False,
                                     repellable=True,
                                     castableIfSilenced=False,
                                     mpCost=90,
@@ -647,6 +650,7 @@ magic = Ability(
                                     oncast=bloodMarkHPFunction,
                                     repellable=True,
                                     castableIfSilenced=False,
+                                    castableOnSelf=False,
                                     mpCost=100,
                                     dependents=[
 
@@ -658,6 +662,7 @@ magic = Ability(
                                     oncast=bloodMarkMPFunction,
                                     repellable=True,
                                     castableIfSilenced=False,
+                                    castableOnSelf=False,
                                     mpCost=100,
                                     dependents=[
 
